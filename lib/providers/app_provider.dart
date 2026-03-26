@@ -1,19 +1,23 @@
 // lib/providers/app_provider.dart
+// Auth via Firebase. All data (courses, grades, events, notifications) via SQLite.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/models.dart';
 import '../services/firebase_service.dart';
+import '../services/database_service.dart';
 
 class AppProvider extends ChangeNotifier {
-  final FirebaseService _svc = FirebaseService();
+  final FirebaseService _auth = FirebaseService();
+  final DatabaseService _db = DatabaseService();
 
-  // ─── Auth state ───────────────────────────────────────────────────────────
+  // ─── Auth ─────────────────────────────────────────────────────────────────
   User? _user;
   User? get user => _user;
   bool get isLoggedIn => _user != null;
 
-  // ─── Data ─────────────────────────────────────────────────────────────────
+  // ─── Data (from SQLite) ───────────────────────────────────────────────────
   StudentProfile? _profile;
   List<Course> _courses = [];
   List<CalendarEvent> _events = [];
@@ -24,40 +28,27 @@ class AppProvider extends ChangeNotifier {
   List<CalendarEvent> get events => _events;
   List<AppNotification> get notifications => _notifications;
 
-  // ─── Loading / error ─────────────────────────────────────────────────────
+  // ─── Loading / error ──────────────────────────────────────────────────────
   bool _loading = false;
   String? _error;
   bool get loading => _loading;
   String? get error => _error;
 
-  // Stream subscriptions
-  StreamSubscription? _profileSub;
-  StreamSubscription? _coursesSub;
-  StreamSubscription? _eventsSub;
-  StreamSubscription? _notifsSub;
-
   // ─── Derived getters ─────────────────────────────────────────────────────
 
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
-
-  int get totalCredits => _courses.fold(0, (sum, c) => sum + c.credits);
+  int get totalCredits => _courses.fold(0, (s, c) => s + c.credits);
 
   Map<String, List<ScheduleEntry>> get weeklySchedule {
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-    final Map<String, List<ScheduleEntry>> schedule = {
-      for (var d in days) d: []
-    };
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    final Map<String, List<ScheduleEntry>> schedule = {for (var d in days) d: []};
     for (final course in _courses) {
-      final courseDays = course.days.split(', ');
-      for (final day in courseDays) {
+      for (final day in course.days.split(', ')) {
         final short = day.length >= 3 ? day.substring(0, 3) : day;
         if (schedule.containsKey(short)) {
           schedule[short]!.add(ScheduleEntry(
-            courseCode: course.code,
-            courseName: course.name,
-            time: course.time,
-            location: course.location,
-            day: short,
+            courseCode: course.code, courseName: course.name,
+            time: course.time, location: course.location, day: short,
           ));
         }
       }
@@ -79,37 +70,34 @@ class AppProvider extends ChangeNotifier {
     return 'D';
   }
 
-  // ─── Auth ─────────────────────────────────────────────────────────────────
+  // ─── Auth listener ────────────────────────────────────────────────────────
 
   void listenToAuth() {
-    _svc.authStateChanges.listen((user) async {
+    _auth.authStateChanges.listen((user) async {
       _user = user;
       if (user != null) {
-        await _subscribeToStreams(user.uid);
+        await _loadAllData(user.uid, user.email ?? '');
       } else {
-        _cancelStreams();
         _clearData();
       }
       notifyListeners();
     });
   }
 
+  // ─── Sign In ──────────────────────────────────────────────────────────────
+
   Future<String?> signIn(String email, String password) async {
     _loading = true;
     _error = null;
     notifyListeners();
     try {
-      final cred = await _svc.signIn(email, password);
+      final cred = await _auth.signIn(email, password);
       _user = cred.user;
-      // Seed data if this is a new user (no profile doc yet)
       if (_user != null) {
-        final existing = await _svc.getStudentProfile(_user!.uid);
-        if (existing == null) {
-          await _svc.seedStudentData(_user!.uid);
-        }
-        await _subscribeToStreams(_user!.uid);
+        await _db.seedData(_user!.uid, _user!.email ?? email);
+        await _loadAllData(_user!.uid, _user!.email ?? email);
       }
-      return null; // success
+      return null;
     } on FirebaseAuthException catch (e) {
       _error = _authError(e.code);
       return _error;
@@ -120,98 +108,128 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await _svc.signOut();
-    _cancelStreams();
+    await _auth.signOut();
     _clearData();
     _user = null;
     notifyListeners();
   }
 
-  Future<String?> changePassword(
-      String currentPassword, String newPassword) async {
-    try {
-      // Re-authenticate first
-      final cred = EmailAuthProvider.credential(
-        email: _user!.email!,
-        password: currentPassword,
-      );
-      await _user!.reauthenticateWithCredential(cred);
-      await _svc.updatePassword(newPassword);
-      return null;
-    } on FirebaseAuthException catch (e) {
-      return _authError(e.code);
-    }
+  Future<String?> changePassword(String current, String newPass) async {
+    final err = await _auth.reauthenticate(current);
+    if (err != null) return err;
+    await _auth.updatePassword(newPass);
+    return null;
   }
 
-  // ─── Profile ─────────────────────────────────────────────────────────────
+  // ─── Profile ──────────────────────────────────────────────────────────────
 
   Future<void> updateProfile(Map<String, dynamic> data) async {
     if (_user == null) return;
-    await _svc.updateStudentProfile(_user!.uid, data);
-    // Stream will update _profile automatically
-  }
-
-  // ─── Notifications ────────────────────────────────────────────────────────
-
-  Future<void> markNotificationRead(String notifId) async {
-    if (_user == null) return;
-    await _svc.markNotificationRead(_user!.uid, notifId);
-  }
-
-  Future<void> markAllNotificationsRead() async {
-    if (_user == null) return;
-    await _svc.markAllNotificationsRead(_user!.uid);
-  }
-
-  Future<void> deleteNotification(String notifId) async {
-    if (_user == null) return;
-    await _svc.deleteNotification(_user!.uid, notifId);
+    await _db.updateProfileField(_user!.uid, data);
+    _profile = await _db.getProfile(_user!.uid);
+    notifyListeners();
   }
 
   // ─── Courses ──────────────────────────────────────────────────────────────
 
-  /// Load assignments for all courses (called once after courses load)
-  Future<void> loadAssignments() async {
+  Future<void> addCourse(Course course) async {
     if (_user == null) return;
-    for (final course in _courses) {
-      final assignments = await _svc.getAssignments(_user!.uid, course.id);
-      course.assignments = assignments;
-    }
+    await _db.insertCourse(_user!.uid, course);
+    await _refreshCourses();
+  }
+
+  Future<void> updateCourse(Course course) async {
+    if (_user == null) return;
+    await _db.updateCourse(_user!.uid, course);
+    await _refreshCourses();
+  }
+
+  Future<void> deleteCourse(String courseId) async {
+    if (_user == null) return;
+    await _db.deleteCourse(_user!.uid, courseId);
+    await _refreshCourses();
+  }
+
+  // ─── Assignments ──────────────────────────────────────────────────────────
+
+  Future<void> addAssignment(String courseId, Assignment a) async {
+    if (_user == null) return;
+    await _db.insertAssignment(_user!.uid, courseId, a);
+    await _refreshCourses();
+  }
+
+  Future<void> updateAssignment(String courseId, Assignment a) async {
+    if (_user == null) return;
+    await _db.updateAssignment(_user!.uid, courseId, a);
+    await _refreshCourses();
+  }
+
+  Future<void> deleteAssignment(String courseId, String assignmentId) async {
+    if (_user == null) return;
+    await _db.deleteAssignment(_user!.uid, courseId, assignmentId);
+    await _refreshCourses();
+  }
+
+  // ─── Calendar Events ──────────────────────────────────────────────────────
+
+  Future<void> addCalendarEvent(CalendarEvent e) async {
+    if (_user == null) return;
+    await _db.insertCalendarEvent(_user!.uid, e);
+    await _refreshEvents();
+  }
+
+  Future<void> deleteCalendarEvent(String eventId) async {
+    if (_user == null) return;
+    await _db.deleteCalendarEvent(_user!.uid, eventId);
+    await _refreshEvents();
+  }
+
+  // ─── Notifications ────────────────────────────────────────────────────────
+
+  Future<void> markNotificationRead(String id) async {
+    if (_user == null) return;
+    await _db.markNotificationRead(_user!.uid, id);
+    await _refreshNotifications();
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    if (_user == null) return;
+    await _db.markAllNotificationsRead(_user!.uid);
+    await _refreshNotifications();
+  }
+
+  Future<void> deleteNotification(String id) async {
+    if (_user == null) return;
+    await _db.deleteNotification(_user!.uid, id);
+    await _refreshNotifications();
+  }
+
+  // ─── Data Loading ─────────────────────────────────────────────────────────
+
+  Future<void> _loadAllData(String uid, String email) async {
+    _profile = await _db.getProfile(uid);
+    _courses = await _db.getCourses(uid);
+    _events = await _db.getCalendarEvents(uid);
+    _notifications = await _db.getNotifications(uid);
     notifyListeners();
   }
 
-  // ─── Streams ──────────────────────────────────────────────────────────────
-
-  Future<void> _subscribeToStreams(String uid) async {
-    _cancelStreams();
-
-    _profileSub = _svc.studentProfileStream(uid).listen((p) {
-      _profile = p;
-      notifyListeners();
-    });
-
-    _coursesSub = _svc.coursesStream(uid).listen((courses) async {
-      _courses = courses;
-      notifyListeners();
-      await loadAssignments();
-    });
-
-    _eventsSub = _svc.calendarEventsStream(uid).listen((events) {
-      _events = events;
-      notifyListeners();
-    });
-
-    _notifsSub = _svc.notificationsStream(uid).listen((notifs) {
-      _notifications = notifs;
-      notifyListeners();
-    });
+  Future<void> _refreshCourses() async {
+    if (_user == null) return;
+    _courses = await _db.getCourses(_user!.uid);
+    notifyListeners();
   }
 
-  void _cancelStreams() {
-    _profileSub?.cancel();
-    _coursesSub?.cancel();
-    _eventsSub?.cancel();
-    _notifsSub?.cancel();
+  Future<void> _refreshEvents() async {
+    if (_user == null) return;
+    _events = await _db.getCalendarEvents(_user!.uid);
+    notifyListeners();
+  }
+
+  Future<void> _refreshNotifications() async {
+    if (_user == null) return;
+    _notifications = await _db.getNotifications(_user!.uid);
+    notifyListeners();
   }
 
   void _clearData() {
@@ -221,30 +239,15 @@ class AppProvider extends ChangeNotifier {
     _notifications = [];
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
   String _authError(String code) {
     switch (code) {
-      case 'user-not-found':
-        return 'No account found with this email.';
-      case 'wrong-password':
-        return 'Incorrect password. Please try again.';
-      case 'invalid-email':
-        return 'Please enter a valid email address.';
-      case 'user-disabled':
-        return 'This account has been disabled.';
-      case 'too-many-requests':
-        return 'Too many attempts. Please try again later.';
-      case 'invalid-credential':
-        return 'Invalid email or password.';
-      default:
-        return 'An error occurred. Please try again.';
+      case 'user-not-found':     return 'No account found with this email.';
+      case 'wrong-password':     return 'Incorrect password. Please try again.';
+      case 'invalid-email':      return 'Please enter a valid email address.';
+      case 'user-disabled':      return 'This account has been disabled.';
+      case 'too-many-requests':  return 'Too many attempts. Please try again later.';
+      case 'invalid-credential': return 'Invalid email or password.';
+      default:                   return 'An error occurred. Please try again.';
     }
-  }
-
-  @override
-  void dispose() {
-    _cancelStreams();
-    super.dispose();
   }
 }

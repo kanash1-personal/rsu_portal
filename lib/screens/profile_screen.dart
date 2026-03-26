@@ -125,6 +125,7 @@ class ProfileScreen extends StatelessWidget {
                   _ActionButton(icon: Icons.lock_outline, label: 'Update Password',
                       onTap: () => _showChangePasswordDialog(context, p)),
                   const SizedBox(height: 8),
+
                   _ActionButton(icon: Icons.download_outlined, label: 'Download Transcript',
                       onTap: () => _showTranscriptDialog(context)),
                   const SizedBox(height: 8),
