@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "288382890653",
+    "project_id": "rsu-portal-app",
+    "storage_bucket": "rsu-portal-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:288382890653:android:898022ee9caf43eefd9a74",
+        "android_client_info": {
+          "package_name": "com.myapp.rsu_portal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqvSkUQ86YW6tVB_LPPtg-TrRupHXOe-s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
