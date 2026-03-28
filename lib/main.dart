@@ -3,18 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+
 import 'firebase_options.dart';
 import 'theme.dart';
 import 'providers/app_provider.dart';
 import 'screens/auth_wrapper.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase — used for Auth only
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      debugPrint("✅ Firebase initialized");
+    } else {
+      debugPrint("⚠️ Firebase already initialized");
+    }
+  } catch (e) {
+    debugPrint("🔥 Firebase init error (ignored): $e");
+  }
 
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // Lock orientation (optional)
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
 
   runApp(
     ChangeNotifierProvider(

@@ -1,4 +1,4 @@
-package com.example.rsu_portal
+package com.RSUPortalApp.rsu_portal
 
 import io.flutter.embedding.android.FlutterActivity
 
