@@ -13,7 +13,7 @@ class GradesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.watch<AppProvider>();
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         backgroundColor: Colors.white, elevation: 0,
         leading: Padding(
@@ -29,7 +29,7 @@ class GradesScreen extends StatelessWidget {
         title: const Text('Student Portal', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.menu, color: AppTheme.textPrimary),
+            icon: Icon(Icons.menu, color: AppTheme.textPrimary(context)),
             onPressed: () => _showMenu(context),
           ),
         ],
@@ -39,8 +39,8 @@ class GradesScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('My Grades', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
-            const Text('Spring 2026 Semester', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+            Text('My Grades', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
+            Text('Spring 2026 Semester', style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 13)),
             const SizedBox(height: 16),
 
             // Stats
@@ -84,15 +84,15 @@ class _StatBox extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: full ? double.infinity : null,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border)),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border(context))),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500)),
+            Text(label, style: TextStyle(fontSize: 12, color: AppTheme.textSecondary(context), fontWeight: FontWeight.w500)),
             const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
-            Text(sub, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+            Text(value, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
+            Text(sub, style: TextStyle(fontSize: 11, color: AppTheme.textMuted(context))),
           ]),
-          Icon(icon, size: 18, color: AppTheme.textMuted),
+          Icon(icon, size: 18, color: AppTheme.textMuted(context)),
         ]),
       );
 }
@@ -127,7 +127,7 @@ class _CourseGradeCardState extends State<_CourseGradeCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border)),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border(context))),
       child: Column(
         children: [
           // Header row — tap to expand
@@ -143,22 +143,22 @@ class _CourseGradeCardState extends State<_CourseGradeCard> {
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(widget.course.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                     Text('${widget.course.code} • ${widget.course.credits} Credits',
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textMuted)),
+                        style: TextStyle(fontSize: 12, color: AppTheme.textMuted(context))),
                   ])),
                   Text(_grade, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: _gradeColor)),
                   const SizedBox(width: 8),
                   Text('${(_weightedScore * 100).toStringAsFixed(0)}%',
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textSecondary(context))),
                   const SizedBox(width: 4),
                   Icon(_expanded ? Icons.expand_less : Icons.expand_more,
-                      size: 18, color: AppTheme.textMuted),
+                      size: 18, color: AppTheme.textMuted(context)),
                 ]),
                 const SizedBox(height: 10),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: _weightedScore,
-                    backgroundColor: AppTheme.border,
+                    backgroundColor: AppTheme.border(context),
                     valueColor: AlwaysStoppedAnimation<Color>(courseColor(widget.course.colorHex)),
                     minHeight: 6,
                   ),
@@ -169,15 +169,15 @@ class _CourseGradeCardState extends State<_CourseGradeCard> {
 
           // Expanded: assignments list + add button
           if (_expanded) ...[
-            const Divider(height: 1, color: AppTheme.border),
+            Divider(height: 1, color: AppTheme.border(context)),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   if (widget.course.assignments.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Text('No assignments yet', style: TextStyle(color: AppTheme.textMuted, fontSize: 13)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text('No assignments yet', style: TextStyle(color: AppTheme.textMuted(context), fontSize: 13)),
                     )
                   else
                     for (final a in widget.course.assignments)
@@ -186,6 +186,7 @@ class _CourseGradeCardState extends State<_CourseGradeCard> {
                         courseId: widget.course.id,
                         onEdit: () => _showEditAssignment(context, a),
                         onDelete: () => _confirmDelete(context, a),
+                        context: context,
                       ),
                   const SizedBox(height: 8),
                   SizedBox(
@@ -285,11 +286,13 @@ class _CourseGradeCardState extends State<_CourseGradeCard> {
         content: Text('Delete "${a.name}"? This cannot be undone.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
+            ElevatedButton(
+          onPressed: () async {
+            if (mounted) {
               Navigator.pop(context);
-              await context.read<AppProvider>().deleteAssignment(widget.course.id, a.id);
-            },
+            }
+            await context.read<AppProvider>().deleteAssignment(widget.course.id, a.id);
+          },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.danger),
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
@@ -318,7 +321,8 @@ class _AssignmentRow extends StatelessWidget {
   final String courseId;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  const _AssignmentRow({required this.assignment, required this.courseId, required this.onEdit, required this.onDelete});
+  final BuildContext context;
+  const _AssignmentRow({required this.assignment, required this.courseId, required this.onEdit, required this.onDelete, required this.context});
 
   @override
   Widget build(BuildContext context) {
@@ -329,11 +333,11 @@ class _AssignmentRow extends StatelessWidget {
       child: Row(children: [
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('${assignment.name} ($weightPct%)',
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppTheme.textPrimary)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppTheme.textPrimary(context))),
           Text('${assignment.score}/${assignment.total}  (${(pct * 100).toStringAsFixed(1)}%)',
-              style: const TextStyle(fontSize: 12, color: AppTheme.textMuted)),
+              style: TextStyle(fontSize: 12, color: AppTheme.textMuted(context))),
         ])),
-        IconButton(icon: const Icon(Icons.edit_outlined, size: 16, color: AppTheme.textMuted), onPressed: onEdit, padding: EdgeInsets.zero, constraints: const BoxConstraints()),
+        IconButton(icon: Icon(Icons.edit_outlined, size: 16, color: AppTheme.textMuted(context)), onPressed: onEdit, padding: EdgeInsets.zero, constraints: const BoxConstraints()),
         const SizedBox(width: 8),
         IconButton(icon: const Icon(Icons.delete_outline, size: 16, color: AppTheme.danger), onPressed: onDelete, padding: EdgeInsets.zero, constraints: const BoxConstraints()),
       ]),

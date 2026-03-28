@@ -12,14 +12,14 @@ import 'profile_screen.dart';
 class MainNav extends StatefulWidget {
   const MainNav({super.key});
 
-  static _MainNavState of(BuildContext context) =>
-      context.findAncestorStateOfType<_MainNavState>()!;
+  static MainNavState of(BuildContext context) =>
+      context.findAncestorStateOfType<MainNavState>()!;
 
   @override
-  State<MainNav> createState() => _MainNavState();
+  State<MainNav> createState() => MainNavState();
 }
 
-class _MainNavState extends State<MainNav> {
+class MainNavState extends State<MainNav> {
   int _currentIndex = 0;
 
   void goTo(int index) => setState(() => _currentIndex = index);
@@ -38,9 +38,9 @@ class _MainNavState extends State<MainNav> {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          border: Border(top: BorderSide(color: AppTheme.border)),
+          border: Border(top: BorderSide(color: AppTheme.border(context))),
         ),
         child: SafeArea(
           child: SizedBox(
@@ -71,13 +71,13 @@ class _MainNavState extends State<MainNav> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(active ? activeIcon : icon,
-                color: active ? AppTheme.primary : AppTheme.textMuted, size: 22),
+                color: active ? AppTheme.primary : AppTheme.textMuted(context), size: 22),
             const SizedBox(height: 2),
             Text(label,
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                  color: active ? AppTheme.primary : AppTheme.textMuted,
+                  color: active ? AppTheme.primary : AppTheme.textMuted(context),
                 )),
           ],
         ),

@@ -43,10 +43,13 @@ class RSUPortalApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.watch<AppProvider>().themeMode;
     return MaterialApp(
       title: 'RSU Student Portal',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       home: const AuthWrapper(),
     );
   }

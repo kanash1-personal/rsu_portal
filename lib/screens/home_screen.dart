@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
     }).toList()..sort((a, b) => a.date.compareTo(b.date));
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -47,7 +47,7 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Student Portal', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.menu, color: AppTheme.textPrimary),
+            icon: Icon(Icons.menu, color: AppTheme.textPrimary(context)),
             onPressed: () => _showMenu(context),
           ),
         ],
@@ -61,9 +61,9 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 4),
                   Text('Welcome back, ${profile.name.split(' ').first}!',
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
                   Text(_formatDate(now),
-                      style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                      style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 14)),
                   const SizedBox(height: 20),
 
                   // Stat cards
@@ -91,14 +91,14 @@ class HomeScreen extends StatelessWidget {
                   AppCard(
                     padding: const EdgeInsets.all(16),
                     child: todayCourses.isEmpty
-                        ? const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Text('No classes today', style: TextStyle(color: AppTheme.textMuted, fontSize: 14)),
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Text('No classes today', style: TextStyle(color: AppTheme.textMuted(context), fontSize: 14)),
                           )
                         : Column(
                             children: [
                               for (int i = 0; i < todayCourses.length; i++) ...[
-                                if (i > 0) const Divider(height: 20, color: AppTheme.border),
+                                if (i > 0) Divider(height: 20, color: AppTheme.border(context)),
                                 _ScheduleItem(course: todayCourses[i], onTap: () => MainNav.of(context).goTo(1)),
                               ],
                             ],
@@ -113,11 +113,11 @@ class HomeScreen extends StatelessWidget {
                   AppCard(
                     padding: const EdgeInsets.all(16),
                     child: courses.isEmpty
-                        ? const Text('No grades yet', style: TextStyle(color: AppTheme.textMuted))
+                        ? Text('No grades yet', style: TextStyle(color: AppTheme.textMuted(context)))
                         : Column(
                             children: [
                               for (int i = 0; i < courses.length && i < 3; i++) ...[
-                                if (i > 0) const Divider(height: 16, color: AppTheme.border),
+                                if (i > 0) Divider(height: 16, color: AppTheme.border(context)),
                                 _GradeItem(course: courses[i], provider: p,
                                     onTap: () => MainNav.of(context).goTo(2)),
                               ],
@@ -133,11 +133,11 @@ class HomeScreen extends StatelessWidget {
                   AppCard(
                     padding: const EdgeInsets.all(16),
                     child: upcoming.isEmpty
-                        ? const Text('No upcoming events', style: TextStyle(color: AppTheme.textMuted))
+                        ? Text('No upcoming events', style: TextStyle(color: AppTheme.textMuted(context)))
                         : Column(
                             children: [
                               for (int i = 0; i < upcoming.length && i < 3; i++) ...[
-                                if (i > 0) const Divider(height: 16, color: AppTheme.border),
+                                if (i > 0) Divider(height: 16, color: AppTheme.border(context)),
                                 _EventItem(event: upcoming[i], now: now,
                                     onTap: () => MainNav.of(context).goTo(3)),
                               ],
@@ -153,11 +153,11 @@ class HomeScreen extends StatelessWidget {
                   AppCard(
                     padding: const EdgeInsets.all(16),
                     child: notifs.isEmpty
-                        ? const Text('No notifications', style: TextStyle(color: AppTheme.textMuted))
+                        ? Text('No notifications', style: TextStyle(color: AppTheme.textMuted(context)))
                         : Column(
                             children: [
                               for (int i = 0; i < notifs.length && i < 2; i++) ...[
-                                if (i > 0) const Divider(height: 16, color: AppTheme.border),
+                                if (i > 0) Divider(height: 16, color: AppTheme.border(context)),
                                 GestureDetector(
                                   onTap: () => MainNav.of(context).goTo(4),
                                   child: _NotifItem(notif: notifs[i]),
@@ -169,8 +169,8 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   // Quick actions
-                  const Text('Quick Actions',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                  Text('Quick Actions',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary(context))),
                   const SizedBox(height: 10),
                   _QuickActionButton(icon: Icons.calendar_today_outlined, label: 'View Schedule', onTap: () => MainNav.of(context).goTo(1)),
                   const SizedBox(height: 8),
@@ -253,15 +253,15 @@ class _StatCard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border)),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border(context))),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500)),
-              Icon(icon, size: 16, color: AppTheme.textMuted),
+              Text(label, style: TextStyle(fontSize: 12, color: AppTheme.textSecondary(context), fontWeight: FontWeight.w500)),
+              Icon(icon, size: 16, color: AppTheme.textMuted(context)),
             ]),
             const SizedBox(height: 10),
-            Text(value, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
-            Text(sub, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+            Text(value, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
+            Text(sub, style: TextStyle(fontSize: 11, color: AppTheme.textMuted(context))),
           ]),
         ),
       );
@@ -275,12 +275,12 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(children: [
-        Icon(icon, size: 18, color: AppTheme.textPrimary),
+        Icon(icon, size: 18, color: AppTheme.textPrimary(context)),
         const SizedBox(width: 6),
-        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+        Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary(context))),
         const Spacer(),
         GestureDetector(onTap: onAction, child: Row(children: [
-          Text(actionText, style: const TextStyle(fontSize: 13, color: AppTheme.primary, fontWeight: FontWeight.w500)),
+          Text(actionText, style: TextStyle(fontSize: 13, color: AppTheme.primary, fontWeight: FontWeight.w500)),
           const Icon(Icons.chevron_right, size: 16, color: AppTheme.primary),
         ])),
       ]);
@@ -299,18 +299,18 @@ class _ScheduleItem extends StatelessWidget {
               decoration: BoxDecoration(color: courseColor(course.colorHex), borderRadius: BorderRadius.circular(2))),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(course.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-            Text(course.code, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted)),
+            Text(course.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary(context))),
+            Text(course.code, style: TextStyle(fontSize: 12, color: AppTheme.textMuted(context))),
             Row(children: [
-              const Icon(Icons.access_time, size: 12, color: AppTheme.textMuted), const SizedBox(width: 3),
-              Text(course.time, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+              Icon(Icons.access_time, size: 12, color: AppTheme.textMuted(context)), const SizedBox(width: 3),
+              Text(course.time, style: TextStyle(fontSize: 11, color: AppTheme.textSecondary(context))),
             ]),
             Row(children: [
-              const Icon(Icons.location_on_outlined, size: 12, color: AppTheme.textMuted), const SizedBox(width: 3),
-              Text(course.location, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+              Icon(Icons.location_on_outlined, size: 12, color: AppTheme.textMuted(context)), const SizedBox(width: 3),
+              Text(course.location, style: TextStyle(fontSize: 11, color: AppTheme.textSecondary(context))),
             ]),
           ])),
-          const Icon(Icons.chevron_right, size: 16, color: AppTheme.textMuted),
+          Icon(Icons.chevron_right, size: 16, color: AppTheme.textMuted(context)),
         ]),
       );
 }
@@ -336,15 +336,15 @@ class _GradeItem extends StatelessWidget {
         Container(width: 10, height: 10, margin: const EdgeInsets.only(right: 10),
             decoration: BoxDecoration(color: courseColor(course.colorHex), shape: BoxShape.circle)),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(course.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-          Text(course.code, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted)),
+          Text(course.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary(context))),
+          Text(course.code, style: TextStyle(fontSize: 12, color: AppTheme.textMuted(context))),
         ])),
         Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Text(grade, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color)),
-          Text('${(_score * 100).toStringAsFixed(0)}%', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+          Text('${(_score * 100).toStringAsFixed(0)}%', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary(context))),
         ]),
         const SizedBox(width: 4),
-        const Icon(Icons.chevron_right, size: 16, color: AppTheme.textMuted),
+        Icon(Icons.chevron_right, size: 16, color: AppTheme.textMuted(context)),
       ]),
     );
   }
@@ -377,19 +377,19 @@ class _EventItem extends StatelessWidget {
         onTap: onTap,
         child: Row(children: [
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(event.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-            if (event.courseCode.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.only(top: 3, bottom: 3),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(color: AppTheme.background, borderRadius: BorderRadius.circular(4)),
-                child: Text(event.courseCode, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
-              ),
-            Row(children: [
-              const Icon(Icons.access_time, size: 12, color: AppTheme.textMuted), const SizedBox(width: 3),
-              Text(event.time, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
-            ]),
-          ])),
+              Text(event.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary(context))),
+              if (event.courseCode.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(top: 3, bottom: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(color: AppTheme.background(context), borderRadius: BorderRadius.circular(4)),
+                  child: Text(event.courseCode, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textSecondary(context))),
+                ),
+              Row(children: [
+                Icon(Icons.access_time, size: 12, color: AppTheme.textMuted(context)), const SizedBox(width: 3),
+                Text(event.time, style: TextStyle(fontSize: 11, color: AppTheme.textSecondary(context))),
+              ]),
+            ])),
           Text(_badge, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _badgeColor)),
         ]),
       );
@@ -402,9 +402,9 @@ class _NotifItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(notif.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-          Text(notif.body, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-          Text(notif.timeAgo, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+          Text(notif.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary(context))),
+          Text(notif.body, style: TextStyle(fontSize: 12, color: AppTheme.textSecondary(context))),
+          Text(notif.timeAgo, style: TextStyle(fontSize: 11, color: AppTheme.textMuted(context))),
         ])),
         if (!notif.isRead)
           Container(width: 8, height: 8, margin: const EdgeInsets.only(top: 4),
@@ -421,7 +421,7 @@ class _QuickActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         width: double.infinity,
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.border)),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.border(context))),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(10),
@@ -430,9 +430,9 @@ class _QuickActionButton extends StatelessWidget {
             child: Row(children: [
               Icon(icon, size: 18, color: AppTheme.primary),
               const SizedBox(width: 10),
-              Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary)),
+              Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary(context))),
               const Spacer(),
-              const Icon(Icons.chevron_right, size: 16, color: AppTheme.textMuted),
+              Icon(Icons.chevron_right, size: 16, color: AppTheme.textMuted(context)),
             ]),
           ),
         ),

@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 4)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, 4)),
                 ],
               ),
               child: Column(
@@ -61,11 +61,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Icon(Icons.school, color: Colors.white, size: 32),
                   ),
                   const SizedBox(height: 20),
-                  const Text('RSU Student Portal',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+                  Text('RSU Student Portal',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
                   const SizedBox(height: 6),
-                  const Text('Sign in to access your account',
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                  Text('Sign in to access your account',
+                      style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 14)),
                   const SizedBox(height: 28),
                   _label('Email'),
                   const SizedBox(height: 6),
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: _inputDeco('Enter your password').copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(_obscurePass ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                            color: AppTheme.textMuted, size: 20),
+                            color: AppTheme.textMuted(context), size: 20),
                         onPressed: () => setState(() => _obscurePass = !_obscurePass),
                       ),
                     ),
@@ -133,8 +133,8 @@ class _LoginScreenState extends State<LoginScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Enter your email to receive a reset link.',
-                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+            Text('Enter your email to receive a reset link.',
+                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary(context))),
             const SizedBox(height: 12),
             TextField(
               controller: ctrl,
@@ -147,10 +147,12 @@ class _LoginScreenState extends State<LoginScreen> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              if (!mounted) return;
+              final ctx = context;
+              Navigator.pop(ctx);
               await FirebaseService().sendPasswordResetEmail(ctrl.text);
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                ScaffoldMessenger.of(ctx).showSnackBar(
                   const SnackBar(content: Text('Reset link sent! Check your email.')),
                 );
               }
@@ -166,18 +168,18 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _label(String text) => Align(
         alignment: Alignment.centerLeft,
         child: Text(text,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary(context))),
       );
 
   InputDecoration _inputDeco(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 14),
+        hintStyle: TextStyle(color: AppTheme.textMuted(context), fontSize: 14),
         filled: true,
         fillColor: const Color(0xFFF9FAFB),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppTheme.border)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppTheme.border)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppTheme.primary, width: 2)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppTheme.border(context))),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppTheme.border(context))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppTheme.primary, width: 2)),
       );
 
   @override

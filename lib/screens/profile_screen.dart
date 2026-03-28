@@ -14,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
     final profile = p.profile;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         backgroundColor: Colors.white, elevation: 0,
         leading: Padding(
@@ -23,12 +23,12 @@ class ProfileScreen extends StatelessWidget {
             onTap: () => MainNav.of(context).goTo(0),
             child: Container(
               decoration: BoxDecoration(color: AppTheme.primary, borderRadius: BorderRadius.circular(8)),
-              child: const Icon(Icons.school, color: Colors.white, size: 18),
+              child: Icon(Icons.school, color: Colors.white, size: 18),
             ),
           ),
         ),
         title: const Text('Student Portal', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-        actions: [IconButton(icon: const Icon(Icons.menu, color: AppTheme.textPrimary),
+        actions: [IconButton(icon: Icon(Icons.menu, color: AppTheme.textPrimary(context)),
             onPressed: () => _showMenuSheet(context))],
       ),
       body: profile == null
@@ -39,10 +39,10 @@ class ProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 4),
-                  const Text('My Profile',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
-                  const Text('Manage your personal information',
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                  Text('My Profile',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
+                  Text('Manage your personal information',
+                      style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 13)),
                   const SizedBox(height: 16),
 
                   // Profile card
@@ -50,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppTheme.border)),
+                        border: Border.all(color: AppTheme.border(context))),
                     child: Column(children: [
                       Container(
                         width: 72, height: 72,
@@ -69,24 +69,24 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text(profile.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+                      Text(profile.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
                       const SizedBox(height: 4),
-                      Text(profile.email, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+                      Text(profile.email, style: TextStyle(fontSize: 13, color: AppTheme.textSecondary(context))),
                       const SizedBox(height: 12),
                       Wrap(spacing: 6, runSpacing: 6, alignment: WrapAlignment.center, children: [
                         _Badge(label: profile.major, color: AppTheme.primary),
-                        _Badge(label: profile.year, color: Colors.transparent, textColor: AppTheme.textSecondary, bordered: true),
-                        _Badge(label: 'GPA: ${profile.gpa.toStringAsFixed(2)}', color: Colors.transparent, textColor: AppTheme.textSecondary, bordered: true),
+                        _Badge(label: profile.year, color: Colors.transparent, textColor: AppTheme.textSecondary(context), bordered: true),
+                        _Badge(label: 'GPA: ${profile.gpa.toStringAsFixed(2)}', color: Colors.transparent, textColor: AppTheme.textSecondary(context), bordered: true),
                       ]),
                       const SizedBox(height: 12),
                       OutlinedButton(
                         onPressed: () => _showEditProfileDialog(context, p),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppTheme.border),
+                          side: BorderSide(color: AppTheme.border(context)),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                         ),
-                        child: const Text('Edit Profile', style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                        child: Text('Edit Profile', style: TextStyle(color: AppTheme.textPrimary(context), fontSize: 13, fontWeight: FontWeight.w600)),
                       ),
                     ]),
                   ),
@@ -117,7 +117,18 @@ class ProfileScreen extends StatelessWidget {
                   ]),
                   const SizedBox(height: 16),
 
-                  const Text('Quick Actions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                  Text('Quick Actions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary(context))),
+                  // Dark mode toggle
+                  _ActionButton(
+                    icon: Theme.of(context).brightness == Brightness.dark
+                        ? Icons.light_mode_outlined
+                        : Icons.dark_mode_outlined,
+                    label: Theme.of(context).brightness == Brightness.dark
+                        ? 'Switch to Light Mode'
+                        : 'Switch to Dark Mode',
+                    onTap: () => context.read<AppProvider>().toggleTheme(),
+                  ),
+                  const SizedBox(height: 8),
                   const SizedBox(height: 10),
                   _ActionButton(icon: Icons.mail_outline, label: 'Change Email',
                       onTap: () => _editField(context, p, 'Email', profile.email, 'email')),
@@ -175,7 +186,7 @@ class ProfileScreen extends StatelessWidget {
     final nameCtrl = TextEditingController(text: p.profile?.name ?? '');
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Edit Profile'),
         content: TextField(
@@ -184,14 +195,16 @@ class ProfileScreen extends StatelessWidget {
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
               await p.updateProfile({'name': nameCtrl.text.trim()});
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Profile updated successfully')),
-              );
+              if (context.mounted) Navigator.pop(context);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Profile updated successfully')),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
             child: const Text('Save', style: TextStyle(color: Colors.white)),
@@ -275,15 +288,15 @@ class ProfileScreen extends StatelessWidget {
   void _confirmSignOut(BuildContext context, AppProvider p) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Sign Out'),
         content: const Text('Are you sure you want to sign out?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
               await p.signOut();
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.danger),
@@ -335,13 +348,13 @@ class _TranscriptOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(border: Border.all(color: AppTheme.border), borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(border: Border.all(color: AppTheme.border(context)), borderRadius: BorderRadius.circular(8)),
         child: Row(children: [
-          const Icon(Icons.picture_as_pdf_outlined, color: AppTheme.danger, size: 20),
+          Icon(Icons.picture_as_pdf_outlined, color: AppTheme.danger, size: 20),
           const SizedBox(width: 10),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-            Text(subtitle, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+            Text(subtitle, style: TextStyle(fontSize: 11, color: AppTheme.textMuted(context))),
           ]),
         ]),
       );
@@ -357,7 +370,7 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20),
-            border: bordered ? Border.all(color: AppTheme.border) : null),
+            border: bordered ? Border.all(color: AppTheme.border(context)) : null),
         child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textColor)),
       );
 }
@@ -370,17 +383,17 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Icon(icon, size: 18, color: AppTheme.textPrimary), const SizedBox(width: 6),
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+          Icon(icon, size: 18, color: AppTheme.textPrimary(context)), const SizedBox(width: 6),
+          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary(context))),
         ]),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.border)),
+              border: Border.all(color: AppTheme.border(context))),
           child: Column(children: [
             for (int i = 0; i < children.length; i++) ...[
               children[i],
-              if (i < children.length - 1) const Divider(height: 1, color: AppTheme.border, indent: 16, endIndent: 16),
+              if (i < children.length - 1) Divider(height: 1, color: AppTheme.border(context), indent: 16, endIndent: 16),
             ],
           ]),
         ),
@@ -395,10 +408,10 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(children: [
-          Icon(icon, size: 16, color: AppTheme.textMuted), const SizedBox(width: 10),
+          Icon(icon, size: 16, color: AppTheme.textMuted(context)), const SizedBox(width: 10),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
-            Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+            Text(label, style: TextStyle(fontSize: 11, color: AppTheme.textMuted(context))),
+            Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary(context))),
           ]),
         ]),
       );
@@ -413,13 +426,13 @@ class _EditableRow extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(children: [
-          Icon(icon, size: 16, color: AppTheme.textMuted), const SizedBox(width: 10),
+          Icon(icon, size: 16, color: AppTheme.textMuted(context)), const SizedBox(width: 10),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
-            Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+            Text(label, style: TextStyle(fontSize: 11, color: AppTheme.textMuted(context))),
+            Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary(context))),
           ])),
           GestureDetector(onTap: onEdit,
-              child: const Text('Edit', style: TextStyle(fontSize: 13, color: AppTheme.primary, fontWeight: FontWeight.w600))),
+              child: Text('Edit', style: TextStyle(fontSize: 13, color: AppTheme.primary, fontWeight: FontWeight.w600))),
         ]),
       );
 }
@@ -434,16 +447,16 @@ class _ActionButton extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: double.infinity,
         decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppTheme.border)),
+            border: Border.all(color: AppTheme.border(context))),
         child: InkWell(
           onTap: onTap, borderRadius: BorderRadius.circular(10),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(children: [
-              Icon(icon, size: 18, color: textColor ?? AppTheme.textSecondary), const SizedBox(width: 10),
-              Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: textColor ?? AppTheme.textPrimary)),
+              Icon(icon, size: 18, color: textColor ?? AppTheme.textSecondary(context)), const SizedBox(width: 10),
+              Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: textColor ?? AppTheme.textPrimary(context))),
               const Spacer(),
-              Icon(Icons.chevron_right, size: 16, color: textColor ?? AppTheme.textMuted),
+              Icon(Icons.chevron_right, size: 16, color: textColor ?? AppTheme.textMuted(context)),
             ]),
           ),
         ),

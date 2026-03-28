@@ -15,7 +15,7 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   bool _showUnread = false;
 
-  Color _notifColor(NotificationType type) {
+  Color _notifColor(NotificationType type, BuildContext context) {
     switch (type) {
       case NotificationType.grade:     return AppTheme.success;
       case NotificationType.deadline:  return AppTheme.warning;
@@ -47,7 +47,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final unreadCount = p.unreadCount;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         backgroundColor: Colors.white, elevation: 0,
         leading: Padding(
@@ -61,7 +61,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
         title: const Text('Student Portal', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-        actions: [IconButton(icon: const Icon(Icons.menu, color: AppTheme.textPrimary),
+        actions: [IconButton(icon: Icon(Icons.menu, color: AppTheme.textPrimary(context)),
             onPressed: () => _showMenuSheet(context))],
       ),
       body: Column(
@@ -71,22 +71,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Row(children: [
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Notifications',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+                Text('Notifications',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
                 Text('$unreadCount unread notification${unreadCount == 1 ? '' : 's'}',
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                    style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 13)),
               ]),
               const Spacer(),
               if (unreadCount > 0)
                 TextButton(
                   onPressed: () => p.markAllNotificationsRead(),
                   style: TextButton.styleFrom(
-                    backgroundColor: AppTheme.background,
+                    backgroundColor: AppTheme.background(context),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8), side: const BorderSide(color: AppTheme.border)),
+                        borderRadius: BorderRadius.circular(8), side: BorderSide(color: AppTheme.border(context))),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
-                  child: const Text('Mark all as read', style: TextStyle(fontSize: 12, color: AppTheme.textPrimary)),
+                  child: Text('Mark all as read', style: TextStyle(fontSize: 12, color: AppTheme.textPrimary(context))),
                 ),
             ]),
           ),
@@ -108,7 +108,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 : ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: filtered.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (ctx, i) {
                       final n = filtered[i];
                       return Dismissible(
@@ -123,7 +123,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         onDismissed: (_) => p.deleteNotification(n.id),
                         child: _NotifCard(
                           notif: n,
-                          iconColor: _notifColor(n.type),
+                          iconColor: _notifColor(n.type, context),
                           icon: _notifIcon(n.type),
                           onTap: () => p.markNotificationRead(n.id),
                           onActionTap: () => _handleAction(context, n.actionLabel),
@@ -152,12 +152,12 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.notifications_none, size: 56, color: AppTheme.textMuted.withOpacity(0.4)),
+          Icon(Icons.notifications_none, size: 56, color: AppTheme.textMuted(context).withValues(alpha: 0.4)),
           const SizedBox(height: 12),
           Text(isUnread ? 'No unread notifications' : 'No notifications',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textSecondary(context))),
           const SizedBox(height: 4),
-          const Text("You're all caught up!", style: TextStyle(fontSize: 13, color: AppTheme.textMuted)),
+          Text("You're all caught up!", style: TextStyle(fontSize: 13, color: AppTheme.textMuted(context))),
         ]),
       );
 }
@@ -175,22 +175,22 @@ class _TabChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: BoxDecoration(
-            color: active ? AppTheme.primary : Colors.white,
+            color: active ? AppTheme.primary: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: active ? AppTheme.primary : AppTheme.border),
+            border: Border.all(color: active ? AppTheme.primary : AppTheme.border(context)),
           ),
           child: Row(children: [
             Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-                color: active ? Colors.white : AppTheme.textPrimary)),
+                color: active ? Colors.white : AppTheme.textPrimary(context))),
             const SizedBox(width: 4),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: active ? Colors.white.withOpacity(0.2) : AppTheme.background,
+                color: active ? Colors.white.withValues(alpha: 0.2) : AppTheme.background(context),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text('$count', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
-                  color: active ? Colors.white : AppTheme.textSecondary)),
+                  color: active ? Colors.white : AppTheme.textSecondary(context))),
             ),
           ]),
         ),
@@ -214,39 +214,39 @@ class _NotifCard extends StatelessWidget {
             color: notif.isRead ? Colors.white : const Color(0xFFF0F6FF),
             borderRadius: BorderRadius.circular(12),
             border: Border(left: BorderSide(color: iconColor, width: 4),
-                right: BorderSide(color: AppTheme.border), top: BorderSide(color: AppTheme.border),
-                bottom: BorderSide(color: AppTheme.border)),
+                right: BorderSide(color: AppTheme.border(context)), top: BorderSide(color: AppTheme.border(context)),
+                bottom: BorderSide(color: AppTheme.border(context))),
           ),
           padding: const EdgeInsets.all(14),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Container(
               width: 36, height: 36,
-              decoration: BoxDecoration(color: iconColor.withOpacity(0.1), shape: BoxShape.circle),
+              decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.1), shape: BoxShape.circle),
               child: Icon(icon, size: 18, color: iconColor),
             ),
             const SizedBox(width: 10),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
                 Expanded(child: Text(notif.title,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary))),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary(context)))),
                 if (!notif.isRead)
                   Container(width: 8, height: 8, margin: const EdgeInsets.only(left: 6),
-                      decoration: const BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle)),
+                      decoration: BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle)),
               ]),
               const SizedBox(height: 3),
-              Text(notif.body, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+              Text(notif.body, style: TextStyle(fontSize: 13, color: AppTheme.textSecondary(context))),
               const SizedBox(height: 6),
               Row(children: [
-                Text(notif.timeAgo, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                Text(notif.timeAgo, style: TextStyle(fontSize: 11, color: AppTheme.textMuted(context))),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: onActionTap,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: AppTheme.background, borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: AppTheme.border)),
+                    decoration: BoxDecoration(color: AppTheme.background(context), borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: AppTheme.border(context))),
                     child: Text(notif.actionLabel,
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.primary)),
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.primary)),
                   ),
                 ),
               ]),

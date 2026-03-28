@@ -32,7 +32,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         backgroundColor: Colors.white, elevation: 0,
         leading: Padding(
@@ -48,14 +48,14 @@ class _ScheduleScreenState extends State<ScheduleScreen>
         title: const Text('Student Portal', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.menu, color: AppTheme.textPrimary),
+            icon: Icon(Icons.menu, color: AppTheme.textPrimary(context)),
             onPressed: () => _showMenu(context),
           ),
         ],
         bottom: TabBar(
           controller: _tab,
           labelColor: AppTheme.primary,
-          unselectedLabelColor: AppTheme.textMuted,
+          unselectedLabelColor: AppTheme.textMuted(context),
           indicatorColor: AppTheme.primary,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
           tabs: const [Tab(text: 'Weekly'), Tab(text: 'Courses')],
@@ -90,18 +90,18 @@ class _WeeklyTab extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('My Schedule', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
-        const Text('Spring 2026 Semester', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+        Text('My Schedule', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
+        Text('Spring 2026 Semester', style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 13)),
         const SizedBox(height: 16),
         Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border)),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border(context))),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Padding(
-              padding: EdgeInsets.all(16),
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: Row(children: [
-                Icon(Icons.calendar_today_outlined, size: 16, color: AppTheme.textPrimary),
-                SizedBox(width: 6),
-                Text('Weekly Schedule', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                Icon(Icons.calendar_today_outlined, size: 16, color: AppTheme.textPrimary(context)),
+                const SizedBox(width: 6),
+                const Text('Weekly Schedule', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
               ]),
             ),
             for (final day in days)
@@ -126,23 +126,14 @@ class _DayHeader extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        color: AppTheme.background,
-        child: Text(day, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
+        color: AppTheme.background(context),
+        child: Text(day, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textSecondary(context))),
       );
 }
 
 class _ScheduleBlock extends StatelessWidget {
   final ScheduleEntry entry;
   const _ScheduleBlock({required this.entry});
-
-  Color get _color {
-    final courses = context.watch<AppProvider>().courses;
-    final c = courses.firstWhere((c) => c.code == entry.courseCode, orElse: () => courses.first);
-    return courseColor(c.colorHex);
-  }
-
-  // ignore: use_build_context_synchronously
-  BuildContext get context => throw UnimplementedError();
 
   @override
   Widget build(BuildContext context) {
@@ -160,8 +151,8 @@ class _ScheduleBlock extends StatelessWidget {
       decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(8)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(entry.courseCode, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
-        Text(entry.time, style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12)),
-        Text(entry.location, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11)),
+        Text(entry.time, style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 12)),
+        Text(entry.location, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 11)),
       ]),
     );
   }
@@ -178,7 +169,7 @@ class _CoursesTab extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          const Text('Course Details', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+          Text('Course Details', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary(context))),
           const Spacer(),
           ElevatedButton.icon(
             onPressed: () => _showCourseDialog(context, null),
@@ -197,9 +188,9 @@ class _CoursesTab extends StatelessWidget {
           Center(
             child: Column(children: [
               const SizedBox(height: 32),
-              const Icon(Icons.school_outlined, size: 48, color: AppTheme.textMuted),
+              Icon(Icons.school_outlined, size: 48, color: AppTheme.textMuted(context)),
               const SizedBox(height: 12),
-              const Text('No courses yet', style: TextStyle(color: AppTheme.textSecondary, fontSize: 15)),
+              Text('No courses yet', style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 15)),
               const SizedBox(height: 8),
               TextButton(onPressed: () => _showCourseDialog(context, null), child: const Text('Add your first course')),
             ]),
@@ -250,7 +241,7 @@ class _CoursesTab extends StatelessWidget {
               _field(daysCtrl, 'Days (e.g. Mon, Wed, Fri)'),
               const SizedBox(height: 12),
               Align(alignment: Alignment.centerLeft,
-                child: const Text('Color', style: TextStyle(fontSize: 12, color: AppTheme.textMuted))),
+                child: Text('Color', style: TextStyle(fontSize: 12, color: AppTheme.textMuted(ctx)))),
               const SizedBox(height: 6),
               Wrap(
                 spacing: 8, runSpacing: 8,
@@ -261,7 +252,7 @@ class _CoursesTab extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: courseColor(hex), shape: BoxShape.circle,
                       border: selectedColor == hex
-                          ? Border.all(color: AppTheme.textPrimary, width: 2)
+                          ? Border.all(color: AppTheme.textPrimary(ctx), width: 2)
                           : null,
                     ),
                     child: selectedColor == hex
@@ -298,7 +289,9 @@ class _CoursesTab extends StatelessWidget {
                 } else {
                   await p.addCourse(course);
                 }
-                Navigator.pop(ctx);
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                }
               },
               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
               child: Text(existing != null ? 'Save' : 'Add', style: const TextStyle(color: Colors.white)),
@@ -330,17 +323,17 @@ class _CourseCard extends StatelessWidget {
     final color = courseColor(course.colorHex);
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border)),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border(context))),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(course.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-            Text(course.code, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted, fontWeight: FontWeight.w500)),
+            Text(course.name, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary(context))),
+            Text(course.code, style: TextStyle(fontSize: 12, color: AppTheme.textMuted(context), fontWeight: FontWeight.w500)),
             const SizedBox(height: 8),
-            _infoRow(Icons.access_time_outlined, course.time),
-            _infoRow(Icons.location_on_outlined, course.location),
-            _infoRow(Icons.calendar_today_outlined, course.days),
-            _infoRow(Icons.person_outline, 'Instructor: ${course.instructor}'),
+            _infoRow(context, Icons.access_time_outlined, course.time),
+            _infoRow(context, Icons.location_on_outlined, course.location),
+            _infoRow(context, Icons.calendar_today_outlined, course.days),
+            _infoRow(context, Icons.person_outline, 'Instructor: ${course.instructor}'),
           ]),
         ),
         Column(children: [
@@ -348,18 +341,18 @@ class _CourseCard extends StatelessWidget {
           const SizedBox(height: 8),
           GestureDetector(
             onTap: () => _CoursesTab._showCourseDialog(context, course),
-            child: const Icon(Icons.edit_outlined, size: 16, color: AppTheme.textMuted),
+            child: Icon(Icons.edit_outlined, size: 16, color: AppTheme.textMuted(context)),
           ),
         ]),
       ]),
     );
   }
 
-  Widget _infoRow(IconData icon, String text) => Padding(
+  Widget _infoRow(BuildContext context, IconData icon, String text) => Padding(
         padding: const EdgeInsets.only(bottom: 3),
         child: Row(children: [
-          Icon(icon, size: 13, color: AppTheme.textMuted), const SizedBox(width: 5),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary))),
+          Icon(icon, size: 13, color: AppTheme.textMuted(context)), const SizedBox(width: 5),
+          Expanded(child: Text(text, style: TextStyle(fontSize: 12, color: AppTheme.textSecondary(context)))),
         ]),
       );
 }

@@ -11,6 +11,21 @@ import '../services/database_service.dart';
 class AppProvider extends ChangeNotifier {
   final FirebaseService _auth = FirebaseService();
   final DatabaseService _db = DatabaseService();
+  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode get themeMode => _themeMode;
+
+  // ─── Theme ───────────────────────────────────────────────────────────────
+
+    void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    notifyListeners();
+  }
+
+  void toggleTheme() {
+    _themeMode =
+        _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    notifyListeners();
+  }
 
   // ─── Auth ─────────────────────────────────────────────────────────────────
   User? _user;

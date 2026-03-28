@@ -65,7 +65,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final startWeekday = firstDay.weekday % 7; // 0=Sun
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.background(context),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -86,7 +86,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         actions: [
 
           IconButton(
-            icon: const Icon(Icons.menu, color: AppTheme.textPrimary),
+            icon: Icon(Icons.menu, color: AppTheme.textPrimary(context)),
             onPressed: () => showModalBottomSheet(
               context: context,
               shape: const RoundedRectangleBorder(
@@ -101,14 +101,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Academic Calendar',
+            Text('Academic Calendar',
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: AppTheme.textPrimary)),
-            const Text('Spring 2026 Semester',
+                    color: AppTheme.textPrimary(context))),
+            Text('Spring 2026 Semester',
                 style:
-                    TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                    TextStyle(color: AppTheme.textSecondary(context), fontSize: 13)),
             const SizedBox(height: 16),
 
             // Legend
@@ -118,7 +118,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.border),
+                border: Border.all(color: AppTheme.border(context)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -138,7 +138,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.border),
+                border: Border.all(color: AppTheme.border(context)),
               ),
               child: Column(
                 children: [
@@ -160,13 +160,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           minimumSize: Size.zero,
-                          side: const BorderSide(color: AppTheme.border),
+                          side: BorderSide(color: AppTheme.border(context)),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6)),
                         ),
-                        child: const Text('Today',
+                        child: Text('Today',
                             style: TextStyle(
-                                fontSize: 12, color: AppTheme.textPrimary)),
+                                fontSize: 12, color: AppTheme.textPrimary(context))),
                       ),
                       const SizedBox(width: 6),
                       _NavBtn(icon: Icons.chevron_left, onTap: _prevMonth),
@@ -182,10 +182,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         .map((d) => Expanded(
                               child: Center(
                                 child: Text(d,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
-                                        color: AppTheme.textMuted)),
+                                        color: AppTheme.textMuted(context))),
                               ),
                             ))
                         .toList(),
@@ -244,7 +244,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         ? Colors.white
                                         : isToday
                                             ? AppTheme.primary
-                                            : AppTheme.textPrimary,
+                                            : AppTheme.textPrimary(context),
                                   ),
                                 ),
                               ),
@@ -283,20 +283,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.border),
+                border: Border.all(color: AppTheme.border(context)),
               ),
               child: _selected == null
-                  ? const Column(
+                  ? Column(
                       children: [
-                        SizedBox(height: 8),
-                        Text('Select a Date',
+                        const SizedBox(height: 8),
+                        const Text('Select a Date',
                             style: TextStyle(
                                 fontSize: 15, fontWeight: FontWeight.w700)),
-                        SizedBox(height: 24),
+                        const SizedBox(height: 24),
                         Text('Tap on a date to view events',
                             style: TextStyle(
-                                fontSize: 13, color: AppTheme.textMuted)),
-                        SizedBox(height: 24),
+                                fontSize: 13, color: AppTheme.textMuted(context))),
+                        const SizedBox(height: 24),
                       ],
                     )
                   : Column(
@@ -309,11 +309,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                         const SizedBox(height: 12),
                         if (_eventsForDay(_selected!).isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Text('No events on this date',
                                 style: TextStyle(
-                                    fontSize: 13, color: AppTheme.textMuted)),
+                                    fontSize: 13, color: AppTheme.textMuted(context))),
                           )
                         else
                           for (final e in _eventsForDay(_selected!))
@@ -348,8 +348,8 @@ class _LegendDot extends StatelessWidget {
                 BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 4),
         Text(label,
-            style: const TextStyle(
-                fontSize: 11, color: AppTheme.textSecondary)),
+            style: TextStyle(
+                fontSize: 11, color: AppTheme.textSecondary(context))),
       ],
     );
   }
@@ -368,10 +368,10 @@ class _NavBtn extends StatelessWidget {
         width: 28,
         height: 28,
         decoration: BoxDecoration(
-          border: Border.all(color: AppTheme.border),
+          border: Border.all(color: AppTheme.border(context)),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(icon, size: 18, color: AppTheme.textPrimary),
+        child: Icon(icon, size: 18, color: AppTheme.textPrimary(context)),
       ),
     );
   }
@@ -406,7 +406,7 @@ class _EventTile extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: AppTheme.border(context)),
       ),
       child: Row(
         children: [
@@ -426,15 +426,15 @@ class _EventTile extends StatelessWidget {
                         fontSize: 14, fontWeight: FontWeight.w600)),
                 if (event.courseCode.isNotEmpty)
                   Text(event.courseCode,
-                      style: const TextStyle(
-                          fontSize: 12, color: AppTheme.textMuted)),
+                      style: TextStyle(
+                          fontSize: 12, color: AppTheme.textMuted(context))),
                 Row(children: [
-                  const Icon(Icons.access_time,
-                      size: 12, color: AppTheme.textMuted),
+                  Icon(Icons.access_time,
+                      size: 12, color: AppTheme.textMuted(context)),
                   const SizedBox(width: 3),
                   Text(event.time,
-                      style: const TextStyle(
-                          fontSize: 12, color: AppTheme.textSecondary)),
+                      style: TextStyle(
+                          fontSize: 12, color: AppTheme.textSecondary(context))),
                 ]),
               ],
             ),
