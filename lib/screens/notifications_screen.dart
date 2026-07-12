@@ -207,53 +207,106 @@ class _NotifCard extends StatelessWidget {
       required this.onTap, required this.onActionTap});
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: notif.isRead ? Colors.white : const Color(0xFFF0F6FF),
-            borderRadius: BorderRadius.circular(12),
-            border: Border(left: BorderSide(color: iconColor, width: 4),
-                right: BorderSide(color: AppTheme.border), top: BorderSide(color: AppTheme.border),
-                bottom: BorderSide(color: AppTheme.border)),
-          ),
-          padding: const EdgeInsets.all(14),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            // Card background + full border
             Container(
-              width: 36, height: 36,
-              decoration: BoxDecoration(color: iconColor.withOpacity(0.1), shape: BoxShape.circle),
-              child: Icon(icon, size: 18, color: iconColor),
-            ),
-            const SizedBox(width: 10),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Expanded(child: Text(notif.title,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary))),
-                if (!notif.isRead)
-                  Container(width: 8, height: 8, margin: const EdgeInsets.only(left: 6),
-                      decoration: const BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle)),
-              ]),
-              const SizedBox(height: 3),
-              Text(notif.body, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
-              const SizedBox(height: 6),
-              Row(children: [
-                Text(notif.timeAgo, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: onActionTap,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: AppTheme.background, borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: AppTheme.border)),
-                    child: Text(notif.actionLabel,
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.primary)),
+              decoration: BoxDecoration(
+                color: notif.isRead ? Colors.white : const Color(0xFFF0F6FF),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.border),
+              ),
+              padding: const EdgeInsets.fromLTRB(18, 14, 14, 14),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Container(
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(
+                    color: iconColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
+                  child: Icon(icon, size: 18, color: iconColor),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Row(children: [
+                      Expanded(
+                        child: Text(
+                          notif.title,
+                          style: const TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                      ),
+                      if (!notif.isRead)
+                        Container(
+                          width: 8, height: 8,
+                          margin: const EdgeInsets.only(left: 6),
+                          decoration: const BoxDecoration(
+                            color: AppTheme.primary, shape: BoxShape.circle,
+                          ),
+                        ),
+                    ]),
+                    const SizedBox(height: 4),
+                    Text(
+                      notif.body,
+                      style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(children: [
+                      Text(
+                        notif.timeAgo,
+                        style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: onActionTap,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppTheme.background,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: AppTheme.border),
+                          ),
+                          child: Text(
+                            notif.actionLabel,
+                            style: const TextStyle(
+                              fontSize: 11, fontWeight: FontWeight.w600,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]),
+                  ]),
                 ),
               ]),
-            ])),
-          ]),
+            ),
+            // Coloured left accent bar — overlaid on top using Stack
+            Positioned(
+              left: 0, top: 0, bottom: 0,
+              child: Container(
+                width: 4,
+                decoration: BoxDecoration(
+                  color: iconColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _QuickNavSheet extends StatelessWidget {
