@@ -795,4 +795,9 @@ class _NotificationsTab extends StatelessWidget {
               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
               child: Text(existing != null ? 'Save' : 'Add', style: const TextStyle(color: Colors.white)),
             ),
-    
+          ],
+        ),
+      ),
+    );
+  }
+}

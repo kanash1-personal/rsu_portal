@@ -266,6 +266,7 @@ class _CourseGradeCardState extends State<_CourseGradeCard> {
                 await p.addAssignment(widget.course.id, a);
               }
 
+              if (!context.mounted) return;
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),

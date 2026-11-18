@@ -289,6 +289,7 @@ class _CoursesTab extends StatelessWidget {
                 } else {
                   await p.addCourse(course);
                 }
+                if (!ctx.mounted) return;
                 Navigator.pop(ctx);
               },
               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),

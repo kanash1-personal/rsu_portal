@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () async {
               Navigator.pop(context);
               await FirebaseService().sendPasswordResetEmail(ctrl.text);
-              if (mounted) {
+              if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Reset link sent! Check your email.')),
                 );

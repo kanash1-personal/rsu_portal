@@ -165,6 +165,7 @@ class ProfileScreen extends StatelessWidget {
             onPressed: () async {
               final val = ctrl.text.trim();
               if (val.isNotEmpty) await p.updateProfile({field: val});
+              if (!context.mounted) return;
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('$label updated successfully')),
@@ -195,6 +196,7 @@ class ProfileScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               await p.updateProfile({'name': nameCtrl.text.trim()});
+              if (!context.mounted) return;
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Profile updated successfully')),
@@ -236,6 +238,7 @@ class ProfileScreen extends StatelessWidget {
               }
               Navigator.pop(context);
               final err = await p.changePassword(currentCtrl.text, newCtrl.text);
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(err ?? 'Password updated successfully'),
                 backgroundColor: err != null ? AppTheme.danger : null,
