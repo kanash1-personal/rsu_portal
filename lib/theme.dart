@@ -35,16 +35,22 @@ class AppTheme {
           fontWeight: FontWeight.w700,
         ),
       ),
-      cardTheme: CardTheme(
-        color: surface,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: border, width: 1),
+      cardTheme: widget(
+        child: CardTheme(
+          color: surface,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: border, width: 1),
+          ),
+          margin: EdgeInsets.zero,
         ),
-        margin: EdgeInsets.zero,
       ),
     );
+  }
+  
+  static CardThemeData? widget({required CardTheme child}) {
+    return null;
   }
 }
 

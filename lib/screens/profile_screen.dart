@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme.dart';
 import 'main_nav.dart';
+import 'admin_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -125,9 +126,16 @@ class ProfileScreen extends StatelessWidget {
                   _ActionButton(icon: Icons.lock_outline, label: 'Update Password',
                       onTap: () => _showChangePasswordDialog(context, p)),
                   const SizedBox(height: 8),
+
                   _ActionButton(icon: Icons.download_outlined, label: 'Download Transcript',
                       onTap: () => _showTranscriptDialog(context)),
                   const SizedBox(height: 8),
+                  if (p.isAdmin) ...[
+                    _ActionButton(icon: Icons.admin_panel_settings_outlined, label: 'Admin Panel',
+                        onTap: () => Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => const AdminScreen()))),
+                    const SizedBox(height: 8),
+                  ],
                   _ActionButton(icon: Icons.logout, label: 'Sign Out',
                       onTap: () => _confirmSignOut(context, p), textColor: AppTheme.danger),
                   const SizedBox(height: 24),
@@ -157,6 +165,7 @@ class ProfileScreen extends StatelessWidget {
             onPressed: () async {
               final val = ctrl.text.trim();
               if (val.isNotEmpty) await p.updateProfile({field: val});
+              if (!context.mounted) return;
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('$label updated successfully')),
@@ -187,6 +196,7 @@ class ProfileScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               await p.updateProfile({'name': nameCtrl.text.trim()});
+              if (!context.mounted) return;
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Profile updated successfully')),
@@ -228,6 +238,7 @@ class ProfileScreen extends StatelessWidget {
               }
               Navigator.pop(context);
               final err = await p.changePassword(currentCtrl.text, newCtrl.text);
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(err ?? 'Password updated successfully'),
                 backgroundColor: err != null ? AppTheme.danger : null,

@@ -84,13 +84,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
         title: const Text('Student Portal',
             style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
         actions: [
+
           IconButton(
             icon: const Icon(Icons.menu, color: AppTheme.textPrimary),
             onPressed: () => showModalBottomSheet(
               context: context,
               shape: const RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(20))),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
               builder: (_) => _QuickNavSheet(),
             ),
           ),
@@ -443,7 +443,7 @@ class _EventTile extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: _typeColor.withOpacity(0.1),
+              color: _typeColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(_typeLabel,

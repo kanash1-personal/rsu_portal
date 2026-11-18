@@ -16,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscurePass = true;
+  bool _adminMode = false;
 
   Future<void> _signIn() async {
     final email = _emailCtrl.text.trim();
@@ -26,7 +27,18 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-    final error = await context.read<AppProvider>().signIn(email, pass);
+    final provider = context.read<AppProvider>();
+    // Set before signIn (not after) — the authStateChanges listener that
+    // swaps LoginScreen for MainNav can fire as soon as signIn resolves
+    // internally, possibly before this function's own `await` returns.
+    // MainNav consumes this flag on mount to route to AdminScreen (or show
+    // an error there if this account isn't actually an admin).
+    if (_adminMode) {
+      provider.requestAdminEntry();
+    } else {
+      provider.clearPendingAdminEntry();
+    }
+    final error = await provider.signIn(email, pass);
     if (error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error), backgroundColor: AppTheme.danger),
@@ -49,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 4)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, 4)),
                 ],
               ),
               child: Column(
@@ -91,7 +103,29 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: loading ? null : () => setState(() => _adminMode = !_adminMode),
+                    borderRadius: BorderRadius.circular(6),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        SizedBox(
+                          width: 20, height: 20,
+                          child: Checkbox(
+                            value: _adminMode,
+                            onChanged: loading ? null : (v) => setState(() => _adminMode = v ?? false),
+                            activeColor: AppTheme.primary,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Sign in as Admin',
+                            style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+                      ]),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity, height: 48,
                     child: ElevatedButton(
@@ -149,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () async {
               Navigator.pop(context);
               await FirebaseService().sendPasswordResetEmail(ctrl.text);
-              if (mounted) {
+              if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Reset link sent! Check your email.')),
                 );

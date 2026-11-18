@@ -1,5 +1,5 @@
 // lib/models/models.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Pure Dart models — no Firebase imports needed (data comes from SQLite).
 
 // ─── Student Profile ──────────────────────────────────────────────────────
 
@@ -18,44 +18,19 @@ class StudentProfile {
   final double gpa;
 
   const StudentProfile({
-    required this.uid,
-    required this.name,
-    required this.email,
-    required this.studentId,
-    required this.major,
-    required this.year,
-    required this.phone,
-    required this.address,
-    required this.enrollmentStatus,
-    required this.startDate,
-    required this.expectedGraduation,
-    required this.gpa,
+    required this.uid, required this.name, required this.email,
+    required this.studentId, required this.major, required this.year,
+    required this.phone, required this.address, required this.enrollmentStatus,
+    required this.startDate, required this.expectedGraduation, required this.gpa,
   });
 
-  factory StudentProfile.fromFirestore(Map<String, dynamic> data, String uid) {
-    return StudentProfile(
-      uid: uid,
-      name: data['name'] ?? '',
-      email: data['email'] ?? '',
-      studentId: data['studentId'] ?? '',
-      major: data['major'] ?? '',
-      year: data['year'] ?? '',
-      phone: data['phone'] ?? '',
-      address: data['address'] ?? '',
-      enrollmentStatus: data['enrollmentStatus'] ?? '',
-      startDate: data['startDate'] ?? '',
-      expectedGraduation: data['expectedGraduation'] ?? '',
-      gpa: (data['gpa'] ?? 0.0).toDouble(),
-    );
-  }
-
-  StudentProfile copyWith({String? name, String? email, String? phone, String? address}) {
+  StudentProfile copyWith({String? name, String? email, String? phone, String? address, double? gpa}) {
     return StudentProfile(
       uid: uid, name: name ?? this.name, email: email ?? this.email,
       studentId: studentId, major: major, year: year,
       phone: phone ?? this.phone, address: address ?? this.address,
       enrollmentStatus: enrollmentStatus, startDate: startDate,
-      expectedGraduation: expectedGraduation, gpa: gpa,
+      expectedGraduation: expectedGraduation, gpa: gpa ?? this.gpa,
     );
   }
 }
@@ -80,15 +55,6 @@ class Course {
     required this.days, required this.credits, required this.colorHex,
     this.assignments = const [],
   });
-
-  factory Course.fromFirestore(Map<String, dynamic> data, String id) {
-    return Course(
-      id: id, code: data['code'] ?? '', name: data['name'] ?? '',
-      instructor: data['instructor'] ?? '', time: data['time'] ?? '',
-      location: data['location'] ?? '', days: data['days'] ?? '',
-      credits: data['credits'] ?? 0, colorHex: data['colorHex'] ?? '#4F8EF7',
-    );
-  }
 }
 
 // ─── Assignment ───────────────────────────────────────────────────────────
@@ -104,14 +70,6 @@ class Assignment {
     required this.id, required this.name, required this.weight,
     required this.score, required this.total,
   });
-
-  factory Assignment.fromFirestore(Map<String, dynamic> data, String id) {
-    return Assignment(
-      id: id, name: data['name'] ?? '',
-      weight: (data['weight'] ?? 0.0).toDouble(),
-      score: data['score'] ?? 0, total: data['total'] ?? 100,
-    );
-  }
 
   double get percentage => total > 0 ? score / total : 0.0;
 }
@@ -145,24 +103,6 @@ class CalendarEvent {
     required this.id, required this.title, required this.courseCode,
     required this.time, required this.date, required this.type,
   });
-
-  factory CalendarEvent.fromFirestore(Map<String, dynamic> data, String id) {
-    return CalendarEvent(
-      id: id, title: data['title'] ?? '', courseCode: data['courseCode'] ?? '',
-      time: data['time'] ?? '',
-      date: (data['date'] as Timestamp).toDate(),
-      type: _parseEventType(data['type'] ?? 'event'),
-    );
-  }
-
-  static EventType _parseEventType(String t) {
-    switch (t) {
-      case 'exam':       return EventType.exam;
-      case 'assignment': return EventType.assignment;
-      case 'holiday':    return EventType.holiday;
-      default:           return EventType.event;
-    }
-  }
 }
 
 enum EventType { exam, assignment, event, holiday }
@@ -183,25 +123,6 @@ class AppNotification {
     required this.timeAgo, required this.type, required this.actionLabel,
     this.isRead = false,
   });
-
-  factory AppNotification.fromFirestore(Map<String, dynamic> data, String id) {
-    return AppNotification(
-      id: id, title: data['title'] ?? '', body: data['body'] ?? '',
-      timeAgo: data['timeAgo'] ?? '',
-      type: _parseType(data['type'] ?? 'info'),
-      actionLabel: data['actionLabel'] ?? '',
-      isRead: data['isRead'] ?? false,
-    );
-  }
-
-  static NotificationType _parseType(String t) {
-    switch (t) {
-      case 'grade':     return NotificationType.grade;
-      case 'deadline':  return NotificationType.deadline;
-      case 'cancelled': return NotificationType.cancelled;
-      default:          return NotificationType.info;
-    }
-  }
 }
 
 enum NotificationType { grade, deadline, cancelled, info }
