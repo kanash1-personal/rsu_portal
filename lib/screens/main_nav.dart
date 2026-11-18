@@ -1,5 +1,7 @@
 // lib/screens/main_nav.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
 import '../theme.dart';
 import 'home_screen.dart';
 import 'schedule_screen.dart';
@@ -7,22 +9,47 @@ import 'grades_screen.dart';
 import 'calendar_screen.dart';
 import 'notifications_screen.dart';
 import 'profile_screen.dart';
+import 'admin_screen.dart';
 
 /// Global accessor so any child screen can switch tabs via MainNav.of(context).goTo(index)
 class MainNav extends StatefulWidget {
   const MainNav({super.key});
 
-  static _MainNavState of(BuildContext context) =>
-      context.findAncestorStateOfType<_MainNavState>()!;
+  static MainNavState of(BuildContext context) =>
+      context.findAncestorStateOfType<MainNavState>()!;
 
   @override
-  State<MainNav> createState() => _MainNavState();
+  State<MainNav> createState() => MainNavState();
 }
 
-class _MainNavState extends State<MainNav> {
+class MainNavState extends State<MainNav> {
   int _currentIndex = 0;
 
   void goTo(int index) => setState(() => _currentIndex = index);
+
+  @override
+  void initState() {
+    super.initState();
+    // Consumes the one-shot flag set by LoginScreen's "Sign in as Admin"
+    // checkbox — runs once per login, after the first frame so Navigator/
+    // ScaffoldMessenger are ready.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final p = context.read<AppProvider>();
+      if (!p.pendingAdminEntry) return;
+      p.clearPendingAdminEntry();
+      if (p.isAdmin) {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen()));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('This account is not authorized for admin access.'),
+            backgroundColor: AppTheme.danger,
+          ),
+        );
+      }
+    });
+  }
 
   final List<Widget> _screens = const [
     HomeScreen(),

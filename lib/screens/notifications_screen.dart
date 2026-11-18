@@ -152,7 +152,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.notifications_none, size: 56, color: AppTheme.textMuted.withOpacity(0.4)),
+          Icon(Icons.notifications_none, size: 56, color: AppTheme.textMuted.withValues(alpha: 0.4)),
           const SizedBox(height: 12),
           Text(isUnread ? 'No unread notifications' : 'No notifications',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
@@ -186,7 +186,7 @@ class _TabChip extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
-                color: active ? Colors.white.withOpacity(0.2) : AppTheme.background,
+                color: active ? Colors.white.withValues(alpha: 0.2) : AppTheme.background,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text('$count', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
@@ -226,7 +226,7 @@ class _NotifCard extends StatelessWidget {
                 Container(
                   width: 36, height: 36,
                   decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.1),
+                    color: iconColor.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, size: 18, color: iconColor),

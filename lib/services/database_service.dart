@@ -290,6 +290,19 @@ class DatabaseService {
     );
   }
 
+  Future<void> updateCalendarEvent(String uid, CalendarEvent e) async {
+    final db = await database;
+    await db.update(
+      'calendar_events',
+      {
+        'title': e.title, 'course_code': e.courseCode, 'time': e.time,
+        'date': e.date.millisecondsSinceEpoch, 'type': _eventTypeStr(e.type),
+      },
+      where: 'id = ? AND uid = ?',
+      whereArgs: [e.id, uid],
+    );
+  }
+
   Future<void> deleteCalendarEvent(String uid, String eventId) async {
     final db = await database;
     await db.delete('calendar_events',
@@ -316,6 +329,20 @@ class DatabaseService {
         'created_at': DateTime.now().millisecondsSinceEpoch,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateNotification(String uid, AppNotification n) async {
+    final db = await database;
+    await db.update(
+      'notifications',
+      {
+        'title': n.title, 'body': n.body, 'time_ago': n.timeAgo,
+        'type': _notifTypeStr(n.type), 'action_label': n.actionLabel,
+        'is_read': n.isRead ? 1 : 0,
+      },
+      where: 'id = ? AND uid = ?',
+      whereArgs: [n.id, uid],
     );
   }
 

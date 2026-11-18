@@ -135,15 +135,6 @@ class _ScheduleBlock extends StatelessWidget {
   final ScheduleEntry entry;
   const _ScheduleBlock({required this.entry});
 
-  Color get _color {
-    final courses = context.watch<AppProvider>().courses;
-    final c = courses.firstWhere((c) => c.code == entry.courseCode, orElse: () => courses.first);
-    return courseColor(c.colorHex);
-  }
-
-  // ignore: use_build_context_synchronously
-  BuildContext get context => throw UnimplementedError();
-
   @override
   Widget build(BuildContext context) {
     final courses = context.watch<AppProvider>().courses;
@@ -160,8 +151,8 @@ class _ScheduleBlock extends StatelessWidget {
       decoration: BoxDecoration(color: blockColor, borderRadius: BorderRadius.circular(8)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(entry.courseCode, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
-        Text(entry.time, style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12)),
-        Text(entry.location, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11)),
+        Text(entry.time, style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 12)),
+        Text(entry.location, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 11)),
       ]),
     );
   }

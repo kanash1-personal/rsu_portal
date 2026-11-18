@@ -17,6 +17,20 @@ class AppProvider extends ChangeNotifier {
   User? get user => _user;
   bool get isLoggedIn => _user != null;
 
+  // Accounts allowed into the Admin panel (Profile → Quick Actions, or the
+  // "Sign in as Admin" checkbox on the login screen).
+  // Edit this list to grant/revoke admin access.
+  static const List<String> _adminEmails = ['admin@rsu.edu'];
+  bool get isAdmin =>
+      _user?.email != null && _adminEmails.contains(_user!.email);
+
+  // One-shot flag set by LoginScreen when "Sign in as Admin" is checked;
+  // consumed by MainNav right after login to jump straight to AdminScreen.
+  bool _pendingAdminEntry = false;
+  bool get pendingAdminEntry => _pendingAdminEntry;
+  void requestAdminEntry() => _pendingAdminEntry = true;
+  void clearPendingAdminEntry() => _pendingAdminEntry = false;
+
   // ─── Data (from SQLite) ───────────────────────────────────────────────────
   StudentProfile? _profile;
   List<Course> _courses = [];
@@ -130,6 +144,16 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Replaces every field on the profile — used by the Admin panel's
+  /// full-profile edit form (updateProfile only patches a few whitelisted
+  /// fields, which isn't enough for e.g. studentId/major/year/enrollment).
+  Future<void> updateFullProfile(StudentProfile p) async {
+    if (_user == null) return;
+    await _db.upsertProfile(p);
+    _profile = await _db.getProfile(_user!.uid);
+    notifyListeners();
+  }
+
   // ─── Courses ──────────────────────────────────────────────────────────────
 
   Future<void> addCourse(Course course) async {
@@ -178,6 +202,12 @@ class AppProvider extends ChangeNotifier {
     await _refreshEvents();
   }
 
+  Future<void> updateCalendarEvent(CalendarEvent e) async {
+    if (_user == null) return;
+    await _db.updateCalendarEvent(_user!.uid, e);
+    await _refreshEvents();
+  }
+
   Future<void> deleteCalendarEvent(String eventId) async {
     if (_user == null) return;
     await _db.deleteCalendarEvent(_user!.uid, eventId);
@@ -185,6 +215,18 @@ class AppProvider extends ChangeNotifier {
   }
 
   // ─── Notifications ────────────────────────────────────────────────────────
+
+  Future<void> addNotification(AppNotification n) async {
+    if (_user == null) return;
+    await _db.insertNotification(_user!.uid, n);
+    await _refreshNotifications();
+  }
+
+  Future<void> updateNotification(AppNotification n) async {
+    if (_user == null) return;
+    await _db.updateNotification(_user!.uid, n);
+    await _refreshNotifications();
+  }
 
   Future<void> markNotificationRead(String id) async {
     if (_user == null) return;

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme.dart';
 import 'main_nav.dart';
+import 'admin_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -129,6 +130,12 @@ class ProfileScreen extends StatelessWidget {
                   _ActionButton(icon: Icons.download_outlined, label: 'Download Transcript',
                       onTap: () => _showTranscriptDialog(context)),
                   const SizedBox(height: 8),
+                  if (p.isAdmin) ...[
+                    _ActionButton(icon: Icons.admin_panel_settings_outlined, label: 'Admin Panel',
+                        onTap: () => Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => const AdminScreen()))),
+                    const SizedBox(height: 8),
+                  ],
                   _ActionButton(icon: Icons.logout, label: 'Sign Out',
                       onTap: () => _confirmSignOut(context, p), textColor: AppTheme.danger),
                   const SizedBox(height: 24),
